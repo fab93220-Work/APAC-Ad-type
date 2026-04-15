@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APAC Ad Type Performance — by Country</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f4f0;
+    color: #1a1a18;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: #1a1a18;
+    margin-bottom: 4px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: #888780;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #888780;
+    margin: 0 0 10px;
+  }
+
+  .tab-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 0.5px solid #c8c7be;
+    font-size: 13px;
+    cursor: pointer;
+    background: #fff;
+    color: #5f5e5a;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .tab:hover { background: #f1efe8; }
+
+  .tab.active {
+    background: #e6f1fb;
+    border-color: #378add;
+    color: #185fa5;
+    font-weight: 500;
+  }
+
+  .country-panel { display: none; }
+  .country-panel.active { display: block; }
+
+  .meta-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.2rem;
+  }
+
+  .metric {
+    background: #eeecea;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .metric-label {
+    font-size: 12px;
+    color: #888780;
+    margin-bottom: 4px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+    font-weight: 500;
+    color: #1a1a18;
+  }
+
+  .winner-tag {
+    display: inline-block;
+    background: #e6f1fb;
+    border: 0.5px solid #378add;
+    color: #185fa5;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 11px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+
+  .warning-tag {
+    display: inline-block;
+    background: #faeeda;
+    border: 0.5px solid #ba7517;
+    color: #854f0b;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 11px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border-radius: 12px;
+    border: 0.5px solid #d3d1c7;
+    padding: 1.25rem;
+    margin-bottom: 10px;
+  }
+
+  .note {
+    font-size: 13px;
+    color: #5f5e5a;
+    padding: 10px 14px;
+    background: #fff;
+    border-radius: 8px;
+    border: 0.5px solid #d3d1c7;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .legend-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #5f5e5a;
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .thin-data-banner {
+    background: #faeeda;
+    border: 0.5px solid #ba7517;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #854f0b;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .footer {
+    font-size: 12px;
+    color: #b4b2a9;
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  @media (max-width: 500px) {
+    .meta-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>APAC — Ad Type Performance by Country</h1>
+    <p>208 ads · 1,815 leads · spend in USD · reporting period ends 15 Apr 2026</p>
+  </div>
+
+  <p class="section-label">Select a country</p>
+  <div class="tab-row">
+    <button class="tab active" onclick="showCountry('sg', this)">🇸🇬 Singapore</button>
+    <button class="tab" onclick="showCountry('au', this)">🇦🇺 Australia</button>
+    <button class="tab" onclick="showCountry('hk', this)">🇭🇰 Hong Kong</button>
+    <button class="tab" onclick="showCountry('kr', this)">🇰🇷 South Korea</button>
+    <button class="tab" onclick="showCountry('my', this)">🇲🇾 Malaysia</button>
+  </div>
+
+  <!-- Singapore -->
+  <div class="country-panel active" id="panel-sg">
+    <div class="meta-row">
+      <div class="metric"><div class="metric-label">Total leads</div><div class="metric-value">1,404</div></div>
+      <div class="metric"><div class="metric-label">Total spend</div><div class="metric-value">$11,437</div></div>
+      <div class="metric"><div class="metric-label">Ads running</div><div class="metric-value">123</div></div>
+    </div>
+    <span class="winner-tag">Top format: Video – Generic · $4.88 CPL · 58 leads</span>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-swatch" style="background:#185fa5"></div>Efficient (≤$8)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#378add"></div>Mid-tier ($8–$12)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#888780"></div>Expensive ($12+)</div>
+    </div>
+    <div class="chart-wrap" style="height:420px">
+      <canvas id="chart-sg" role="img" aria-label="Singapore ad type weighted CPL bar chart">Video Generic $4.88, Image Generic $5.07, UGC Staff $5.63, AI Voiceover $5.88, Workout $7.25, UGC Mix $7.67, TSV $10.09, Studio $10.26, HQ Static $10.77, Collage $11.39, UGC Members $11.51, Landmark $14.57, TSV Members $14.94, Animation $15.73, Text/Graphic $21.87.</canvas>
+    </div>
+    <div class="note">Most mature APAC market with the broadest format variety. Video – Generic, Image – Generic and UGC – Staff are the most efficient. Notably, TSV — which performs strongly in Europe — is expensive here at $10.09, suggesting time-sensitive offer messaging doesn't travel as well in Singapore. Text/Graphic Image is the worst performer at $21.87, the inverse of Italy in Europe.</div>
+  </div>
+
+  <!-- Australia -->
+  <div class="country-panel" id="panel-au">
+    <div class="meta-row">
+      <div class="metric"><div class="metric-label">Total leads</div><div class="metric-value">258</div></div>
+      <div class="metric"><div class="metric-label">Total spend</div><div class="metric-value">$3,037</div></div>
+      <div class="metric"><div class="metric-label">Ads running</div><div class="metric-value">49</div></div>
+    </div>
+    <span class="winner-tag">Top format: HQ Video · $8.61 CPL · 119 leads</span>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-swatch" style="background:#185fa5"></div>Efficient (≤$8)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#378add"></div>Mid-tier ($8–$12)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#888780"></div>Expensive ($12+)</div>
+    </div>
+    <div class="chart-wrap" style="height:230px">
+      <canvas id="chart-au" role="img" aria-label="Australia ad type weighted CPL bar chart">HQ Video $8.61, Collage $11.23, TSV $11.76, HQ Static Image $12.96, Workout $17.76.</canvas>
+    </div>
+    <div class="note">Australia responds to polished, high-production creative — HQ Video leads by a clear margin and accounts for nearly half the country's leads. Workout is costly at $17.76, significantly underperforming versus Singapore. Collage is an interesting second-place format worth testing further.</div>
+  </div>
+
+  <!-- Hong Kong -->
+  <div class="country-panel" id="panel-hk">
+    <div class="meta-row">
+      <div class="metric"><div class="metric-label">Total leads</div><div class="metric-value">140</div></div>
+      <div class="metric"><div class="metric-label">Total spend</div><div class="metric-value">$1,215</div></div>
+      <div class="metric"><div class="metric-label">Ads running</div><div class="metric-value">8</div></div>
+    </div>
+    <span class="winner-tag">Top format: Workout · $4.17 CPL · 7 leads</span>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-swatch" style="background:#185fa5"></div>Efficient (≤$8)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#378add"></div>Mid-tier ($8–$12)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#888780"></div>Expensive ($12+)</div>
+    </div>
+    <div class="chart-wrap" style="height:230px">
+      <canvas id="chart-hk" role="img" aria-label="Hong Kong ad type weighted CPL bar chart">Workout $4.17, Landmark $5.18, Image Generic $8.91, Studio $9.02, Collage $11.06.</canvas>
+    </div>
+    <div class="note">Small sample (8 ads) but interesting signals — Workout and Landmark lead on efficiency. Studio performs competitively at $9.02, which differs from most other markets. Collage appears across SG, AU and HK, suggesting it has regional relevance worth investing in further.</div>
+  </div>
+
+  <!-- South Korea -->
+  <div class="country-panel" id="panel-kr">
+    <div class="thin-data-banner">
+      ⚠️ Thin data — 7 ads, 11 leads. Patterns are directional only, not conclusive.
+    </div>
+    <div class="meta-row">
+      <div class="metric"><div class="metric-label">Total leads</div><div class="metric-value">11</div></div>
+      <div class="metric"><div class="metric-label">Total spend</div><div class="metric-value">$138</div></div>
+      <div class="metric"><div class="metric-label">Ads running</div><div class="metric-value">7</div></div>
+    </div>
+    <span class="warning-tag">Directional only: Video – Generic · $5.82 CPL</span>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-swatch" style="background:#185fa5"></div>Efficient (≤$8)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#378add"></div>Mid-tier ($8–$12)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#888780"></div>Expensive ($12+)</div>
+    </div>
+    <div class="chart-wrap" style="height:180px">
+      <canvas id="chart-kr" role="img" aria-label="South Korea ad type weighted CPL bar chart">Video Generic $5.82, Workout $16.92, Text/Graphic $18.76.</canvas>
+    </div>
+    <div class="note">Insufficient data to draw meaningful conclusions. Needs significantly more budget and format variety before South Korea can be properly assessed.</div>
+  </div>
+
+  <!-- Malaysia -->
+  <div class="country-panel" id="panel-my">
+    <div class="thin-data-banner">
+      ⚠️ Thin data — 18 ads, 2 leads. Patterns are directional only, not conclusive.
+    </div>
+    <div class="meta-row">
+      <div class="metric"><div class="metric-label">Total leads</div><div class="metric-value">2</div></div>
+      <div class="metric"><div class="metric-label">Total spend</div><div class="metric-value">$103</div></div>
+      <div class="metric"><div class="metric-label">Ads running</div><div class="metric-value">18</div></div>
+    </div>
+    <span class="warning-tag">Effectively untested — $103 spend · 2 leads across all formats</span>
+    <div class="note">Malaysia has 18 ads running but has generated almost no leads — $103 total spend with a $32.25 CPL on TSV, the only format with any return at all. This market requires a complete format and budget rethink before meaningful conclusions can be drawn.</div>
+  </div>
+
+  <div class="footer">APAC Regional Report · Data through 15 Apr 2026 · Indonesia excluded (0 leads) · Spend reported in USD</div>
+
+</div>
+
+<script>
+function showCountry(id, btn) {
+  document.querySelectorAll('.country-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const gridColor = 'rgba(0,0,0,0.06)';
+const textColor = '#888780';
+
+function barColor(cpl) {
+  if (cpl <= 8)  return '#185fa5';
+  if (cpl <= 12) return '#378add';
+  return '#888780';
+}
+
+function makeChart(id, data) {
+  const sorted = [...data].sort((a, b) => a.cpl - b.cpl);
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(d => d.label),
+      datasets: [{
+        data: sorted.map(d => d.cpl),
+        backgroundColor: sorted.map(d => barColor(d.cpl)),
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' $' + ctx.raw.toFixed(2) + ' CPL · ' + sorted[ctx.dataIndex].leads + ' leads'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: textColor, callback: v => '$' + v },
+          title: { display: true, text: 'Weighted CPL (USD)', color: textColor, font: { size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: textColor, font: { size: 13 } }
+        }
+      }
+    }
+  });
+}
+
+makeChart('chart-sg', [
+  { label: 'Video – Generic',  cpl: 4.88,  leads: 58  },
+  { label: 'Image – Generic',  cpl: 5.07,  leads: 138 },
+  { label: 'UGC – Staff',      cpl: 5.63,  leads: 118 },
+  { label: 'AI Voiceover',     cpl: 5.88,  leads: 12  },
+  { label: 'Workout',          cpl: 7.25,  leads: 448 },
+  { label: 'UGC – Mix',        cpl: 7.67,  leads: 131 },
+  { label: 'TSV',              cpl: 10.09, leads: 312 },
+  { label: 'Studio',           cpl: 10.26, leads: 37  },
+  { label: 'HQ Static Image',  cpl: 10.77, leads: 50  },
+  { label: 'Collage',          cpl: 11.39, leads: 35  },
+  { label: 'UGC – Members',    cpl: 11.51, leads: 20  },
+  { label: 'Landmark',         cpl: 14.57, leads: 13  },
+  { label: 'TSV – Members',    cpl: 14.94, leads: 5   },
+  { label: 'Animation',        cpl: 15.73, leads: 14  },
+  { label: 'Text/Graphic',     cpl: 21.87, leads: 13  },
+]);
+
+makeChart('chart-au', [
+  { label: 'HQ Video',         cpl: 8.61,  leads: 119 },
+  { label: 'Collage',          cpl: 11.23, leads: 23  },
+  { label: 'TSV',              cpl: 11.76, leads: 36  },
+  { label: 'HQ Static Image',  cpl: 12.96, leads: 21  },
+  { label: 'Workout',          cpl: 17.76, leads: 59  },
+]);
+
+makeChart('chart-hk', [
+  { label: 'Workout',          cpl: 4.17,  leads: 7   },
+  { label: 'Landmark',         cpl: 5.18,  leads: 13  },
+  { label: 'Image – Generic',  cpl: 8.91,  leads: 46  },
+  { label: 'Studio',           cpl: 9.02,  leads: 54  },
+  { label: 'Collage',          cpl: 11.06, leads: 20  },
+]);
+
+makeChart('chart-kr', [
+  { label: 'Video – Generic',  cpl: 5.82,  leads: 5 },
+  { label: 'Workout',          cpl: 16.92, leads: 2 },
+  { label: 'Text/Graphic',     cpl: 18.76, leads: 4 },
+]);
+</script>
+</body>
+</html>
